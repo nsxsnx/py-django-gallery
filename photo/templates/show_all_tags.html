@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load photo_galleryname %}
+{% block keywords %}"tags"{% endblock %}
+{% block description %}"All {% photo_galleryname %} tags"{% endblock %}
+{% block title %}All tags - {% photo_galleryname %}{% endblock %}
+{% block extrahead %}
+    <meta name="robots" content="noindex, follow"/>
+{% endblock %}
+
+{% block admin_menu %}
+   {{ block.super }}
+     <li><a href="{% url 'admin:photo_tag_changelist' %}">Edit tags</a></li>
+{% endblock %}
+
+{% block content %}
+{% for group in tags %}
+   {% for item in group %}
+      {% if forloop.first %}
+         <h4 class="text-left"><a href="{% url 'photo.views.show_albums' filter=item.name %}" >{{ item.name }}</a>:</h4>
+         <ul class="text-left">
+      {% endif %}
+      {% if not forloop.first %}
+         <li><a href="{% url 'photo.views.show_albums' filter=item.name %}" >{{ item.name }}</a></li>
+      {% endif %}
+   {% endfor %}
+         </ul>
+{% endfor %}
+{% endblock %}

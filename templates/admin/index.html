@@ -1,0 +1,22 @@
+{% extends "admin/django_admin_index.html" %}
+{# 
+To extend django admin template I had to create the link:
+ln -s /usr/lib/python2.6/site-packages/django/contrib/admin/templates/admin/index.html templates/admin/django_admin_index.html -->
+#}
+
+{% block sidebar %}
+    <div id="content-related">
+    <div class="module" id="links-module">
+        <h2> Useful links </h2>
+            <ul class="actionlist">
+               <li class="addlink">
+               <a href="{% url 'photo.views.admin_albums_add' %}">Add albums</a>
+               </li>
+               <li>
+                - <a href="{% url 'photo.views.show_albums' %}">Photo home page</a>
+               </li>
+            </ul>
+    </div>
+    </div>
+{% endblock %}
+

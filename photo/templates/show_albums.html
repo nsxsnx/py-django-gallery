@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load photo_ad %}
+{% load cache %}
+{% block description %}"{{ description|capfirst }}"{% endblock %}
+{% block title %}{{ title|capfirst }}{% endblock %}
+
+{% block admin_menu %}
+   {{ block.super }}
+   {% if menu_tag  %}
+     <li><a href="{% url 'admin:photo_tag_change' menu_tag.id %}">Change tag</a></li>
+   {% else %}
+     <li><a href="{% url 'admin:photo_album_changelist' %}">Edit albums</a></li>
+   {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if page_h1 %}
+   <h1 class="tag_title">{{page_h1|title}}</h1>
+{% endif %}
+
+<div class="albums">
+{% for album in albums %}
+    <div class="album">
+        <div class="title"> <a href="{{ album.get_absolute_url }}">{{ album.name }}</a> </div>
+        <div class="view">
+            {% if show_icons %}
+                <a href="{{ album.get_absolute_url_t }}"><span class="glyphicon glyphicon-th"></span></a>
+                <a href="{{ album.get_absolute_url_f }}"><span class="glyphicon glyphicon-align-justify"></span></a>&nbsp;
+            {% endif %}
+        </div>
+        <a href="{{ album.get_absolute_url }}"><img class="img-rounded" alt="{{ album.name }}"
+        src="{{ album.cover.thumbnail.url }}" width="{{ album.cover.thumbnail.width }}" height="{{ album.cover.thumbnail.height }}" /></a>
+    </div>
+    {% if forloop.counter in ad_pos %}
+    {% cache 600 bd_ci_sas view_name %}
+        {% photo_ad "bd_ci_sas" view_name %}
+    {% endcache %}
+    {% endif %}
+{% empty %}
+    No albums found
+{% endfor %}
+</div>
+
+{% comment %}
+<div class="paginator">
+   <ul class="pagination">
+      {% if albums.has_previous %}
+         {% if filter %}  <li><a href="{% url 'photo.views.show_albums' filter=filter %}{{ albums.previous_page_number }}/">&laquo;</a></li>
+         {% else %}      <li><a href="{% url 'photo.views.show_albums' %}{{ albums.previous_page_number }}/">&laquo;</a></li>
+         {% endif %}
+      {% endif %}
+      {% for page in albums.show_pages %}
+         {% if page == albums.number %}
+            <li class="active"><a href="">{{ albums.number }}<span class="sr-only">(current)</span></a></li>
+         {% elif page == 0 %}
+           <li class="disabled"><a href="#">...</a></li>
+         {% else %}
+            {% if filter %} <li><a href="{% url 'photo.views.show_albums' filter=filter %}{{ page }}/">{{ page }}</a></li>
+            {% else %}     <li><a href="{% url 'photo.views.show_albums' %}{{ page }}/">{{ page }}</a></li>
+            {% endif %}
+         {% endif %}
+      {% endfor %}
+      {% if albums.has_next %}
+         {% if filter %} <li><a href="{% url 'photo.views.show_albums' filter=filter %}{{ albums.next_page_number }}/">&raquo;</a></li>
+         {% else %}      <li><a href="{% url 'photo.views.show_albums' %}{{ albums.next_page_number }}/">&raquo;</a></li>
+         {% endif %}
+      {% endif %}
+   </ul>
+</div>
+{% endcomment %}
+<nav class="paginator">
+{% if albums.has_next %}
+{% if filter %} <a class="btn btn-primary" href="{% url 'photo.views.show_albums' filter=filter %}{{ albums.next_page_number }}/">{{ pagination_btn_text }}</a>
+{% else %}      <a class="btn btn-primary" href="{% url 'photo.views.show_albums' %}{{ albums.next_page_number }}/">{{ pagination_btn_text }}</a>
+{% endif %}
+{% endif %}
+{% if special_button.enabled %}
+<a class="btn {{ special_button.class }}" href="{{ special_button.link }}" rel="nofollow" target="_blank"><span class="glyphicon {{ special_button.glyphicon }}"></span> {{ special_button.text }}</a>
+{% endif %}
+</nav>
+{% endblock %}

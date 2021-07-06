@@ -1,0 +1,35 @@
+{% extends 'admin/base_site.html' %}
+
+{% block extrastyle %}
+<style> 
+<!--
+#id_path { width: 500px; }
+#id_url { width: 500px; }
+#id_submit { width: 500px; }
+-->
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+   <a href="{% url 'admin:index' %}">Home</a> ›
+   <a href="{% url 'admin:app_list' 'photo' %}">Photo</a> ›
+   <a href="{% url 'admin:photo_album_changelist' %}">Albums</a> ›
+   <a href="{% url 'photo.views.admin_albums_add' %}">Add</a>
+</div>
+{% endblock %}
+{% block content %}
+<div class="main">
+   {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+   <h1>Add albums</h1>
+   <form action="{% url 'photo.views.admin_albums_add' %}" method="post"> {% csrf_token %}
+      <table>
+       {{ form }}
+       <tr><th></th><td>
+       <input type="submit" value="Add" id="id_submit" /> 
+       </td></tr>
+      </table>
+   </form>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load photo_ad %}
+
+{% block description %}"Error {{ status }}"{% endblock %} 
+{% block title %}{{ message|capfirst }}{% endblock %} 
+
+{% block extrahead %}
+{% endblock %}
+
+{% block content %}
+<h1 class="album_title">{{ message }}</h1>
+{% if description %}
+   <div class="description">
+       <p class="centered">{{ description|safe }}</p>
+   </div>
+{% endif %}
+<hr />
+{% photo_ad "bd_ci" view_name %}
+{% if similar_albums %}
+   <div class="albums">
+   {% for album in similar_albums %}
+      <div class="album">
+         <div class="title">
+            <a href="{{ album.get_absolute_url }}" rel="nofollow" >{{ album.name }}</a>
+         </div>
+      <a href="{{ album.get_absolute_url }}" rel="nofollow"><img class="img-rounded" alt="{{ album.name }}"
+        src="{{ album.cover.thumbnail.url }}" width="{{ album.cover.thumbnail.width }}" height="{{ album.cover.thumbnail.height }}" /></a>
+      </div>
+   {% endfor %}
+   </div>
+   <nav class="paginator">
+   <a class="btn btn-primary" href="{% url 'photo.views.show_albums' %}">{{ pagination_btn_text }}</a>
+   {% if special_button.enabled %}
+   <a class="btn {{ special_button.class }}" href="{{ special_button.link }}" rel="nofollow" target="_blank"><span class="glyphicon {{ special_button.glyphicon }}"></span> {{ special_button.text }}</a>
+   {% endif %}
+   </nav>
+{% endif %}
+
+{% endblock %}

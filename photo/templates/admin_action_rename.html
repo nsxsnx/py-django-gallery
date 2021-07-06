@@ -1,0 +1,27 @@
+{% extends "admin/base_site.html" %}
+{% block extrahead %}
+{{ form.media }}
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+   <a href="{% url 'admin:index' %}">Home</a> ›
+   <a href="{% url 'admin:app_list' 'photo' %}">Photo</a> ›
+   Rename
+</div>
+{% endblock %}
+
+{% block content %}
+<h1>Rename</h1>
+<form action="" method="post">{% csrf_token %}
+<fieldset class="module aligned">
+   <div class="form-row field-tags">
+         {{ form.as_p }}
+   </div>
+   <div class="form-row field-tags">
+      <input type="hidden" name="action" value="rename" />
+      <input type="submit" name="submit" value="Rename" class="default" />
+   </div>
+</fieldset>
+</form>
+{% endblock %}

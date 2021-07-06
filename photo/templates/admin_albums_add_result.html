@@ -1,0 +1,30 @@
+{% extends 'admin_albums_add.html' %}
+
+{% block content %}
+
+<div class="main" align="center">
+   {% autoescape off %}
+   {% if dbg %}<p><strong>DEBUG: {{ dbg }}</strong></p>{% endif %}
+   {% if message %}<p><strong>{{ message }}</strong></p>{% endif %}
+   {% endautoescape%}
+
+   <div align="center">
+      <div style = "float:left; width: 130px; padding:1% 0% 0% 38%">
+      <form action="{% url 'photo.views.admin_albums_add' %}" method="get">
+         {% csrf_token %}
+         <input type="submit" value="Add more" style="width: 125px;" />
+      </form>
+      </div>
+   
+      <div style = "float:left; width: 130px; padding: 1%">
+      <form action="{% url 'admin:photo_album_changelist' %}" method="post">
+         {% csrf_token %}
+         <input type="submit" value="Moderate" style="width: 125px;" />
+      </form>
+      </div>
+   <div style = "clear:both"></div>
+   </div>
+
+</div>
+
+{% endblock %}

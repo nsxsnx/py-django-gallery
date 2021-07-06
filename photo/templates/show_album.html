@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load photo_ad %}
+{% load cache %}
+{% comment %}
+{% load photo_share_buttons %}
+{% endcomment %}
+
+{% block description %}"{{ description|capfirst }}"{% endblock %} 
+{% block title %}{{ title|capfirst }}{% endblock %} 
+
+{% block extrahead %}
+   {% if views_count %} <script async src="/a/c/{{ album.id }}/dumb.js"></script> {% endif %}
+   <meta name="plugz:title" content="{{ album.name }}" />          
+   <meta name="plugz:tags" content="{{ album.tags_as_str }}"/>
+   <meta name="plugz:imgurl" content="{{ images.first.get_full_image_url }}" />  
+   <meta name="plugz:pageurl" content="{{ album.get_full_absolute_url }}" /> 
+   <meta name="plugz:contenttype" content="IMAGE"/>  
+{% endblock %}
+
+{% block admin_menu %}
+{{ block.super }}
+<li><a href="{% url 'admin:photo_album_change' album.id %}">Change album</a></li>
+{% endblock %}
+
+{% block content %}
+<h1 class="album_title">{{ album.name }}</h1>
+{% comment %}
+{% if show_icons %}
+   <div class="view">
+       <a href="{{ album.get_absolute_url_t }}"><span class="glyphicon glyphicon-th"></span></a>
+       <a href="{{ album.get_absolute_url_f }}"><span class="glyphicon glyphicon-align-justify"></span></a>&nbsp;
+   </div>
+{% endif %}
+{% endcomment %}
+{% if tags %}
+   <div class="tags">
+   {% for group in tags %}
+      <div class="tag_group">
+      {% for item in group %}
+         {% if forloop.first %}{{ item.name }}:
+         {% else %}&#160;<a href="{% url 'photo.views.show_albums' filter=item.name %}" >{{ item.name }}</a>
+         {% endif %}
+      {% endfor %}
+      </div>
+   {% endfor %}
+   </div>
+{% endif %}
+{% comment %}
+{% sb_top_as as sb_top %}
+{% if sb_top %}
+    {% photo_share_buttons album.get_absolute_url album.name images.first.image.url %}
+{% endif %}
+{% if view == "f" %}
+{% endcomment %}
+{% for img in images %}
+   <figure class="photo">
+   {% if image_link %}
+      <a href="{{ image_link }}" target="_blank" >
+   {% else %}
+      <a href="{{ img.image.url }}" target="_blank" >
+   {% endif %}
+   <img class="img-rounded full" alt="{{ album.name }}" src="{{ img.image.url }}" width="{{ img.image.width }}" height="{{ img.image.height }}" />
+   </a>
+   {% if forloop.first %} <figcaption>{{ album.name }}</figcaption> {% endif %}
+   </figure>
+{% if forloop.first %}
+{% if album.description %}
+   <div class="description">
+      {{ album.description|safe }}
+   </div>
+{% endif %}
+{% cache 600 bd_ci_sa view_name %}
+   {% photo_ad "bd_ci_sa" view_name %}
+{% endcache %}
+{% endif %}
+{% empty %}
+   <p>No photos found</p>
+{% endfor %}
+{% comment %}
+{% else %}
+{% for img in images %}
+         <a href="{{ img.image.url }}" >
+         <img class="img-rounded thumbnail" alt="{{ album.name }}" src="{{ img.thumbnail.url }}" width="{{ img.thumbnail.width }}" height="{{ img.thumbnail.height }}" />
+         </a>
+      {% if forloop.counter in ad_pos %}
+         {% photo_ad "bd_ci1" view_name %}
+      {% endif %}
+{% empty %}
+   <p>No photos found</p>
+{% endfor %}
+{% endif %}
+{% if bottom_tags and tags %}
+   <div class="tags">
+   {% for group in tags %}
+      <div class="tag_group">
+      {% for item in group %}
+         {% if forloop.first %} <a class="tag_group" href="{% url 'photo.views.show_albums' filter=item.name %}" >{{ item.name }}</a>:
+         {% else %}             <a href="{% url 'photo.views.show_albums' filter=item.name %}" >{{ item.name }}</a>
+            {% if not forloop.last %}&#160;{% endif %}
+         {% endif %}
+      {% endfor %}
+      </div>
+   {% endfor %}
+   </div>
+{% endif %}
+{% sb_bottom_as as sb_bottom %}
+{% if sb_bottom %}
+    {% photo_share_buttons album.get_absolute_url album.name images.first.image.url %}
+{% endif %}
+{% endcomment %}
+{% cache 5 similar_albums %}
+{% if similar_albums %}
+   {% if similar_albums_header %}
+   <hr />
+   <div class="similar_albums_header">{{ similar_albums_header }}</div>
+   {% endif %}
+   <div class="albums">
+   {% for album in similar_albums %}
+      <div class="album">
+         <div class="title">
+            <a href="{{ album.get_absolute_url }}" rel="nofollow" >{{ album.name }}</a>
+         </div>
+      <a href="{{ album.get_absolute_url }}" rel="nofollow"><img class="img-rounded" alt="{{ album.name }}"
+        src="{{ album.cover.thumbnail.url }}" width="{{ album.cover.thumbnail.width }}" height="{{ album.cover.thumbnail.height }}" /></a>
+      </div>
+   {% endfor %}
+   </div>
+   <nav class="paginator">
+   <a class="btn btn-primary" href="{% url 'photo.views.show_albums' %}">{{ pagination_btn_text }}</a>
+   {% if special_button.enabled %}
+   <a class="btn {{ special_button.class }}" href="{{ special_button.link }}" rel="nofollow" target="_blank"><span class="glyphicon {{ special_button.glyphicon }}"></span> {{ special_button.text }}</a>
+   {% endif %}
+   </nav>
+{% endif %}
+{% endcache %}
+
+{% endblock %}

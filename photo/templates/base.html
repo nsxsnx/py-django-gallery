@@ -1,0 +1,181 @@
+{% load photo_galleryname %}
+{% load photo_ad %}
+{% load photo_menus %}
+{% photo_menu_main_as as photo_menu_main %}
+{% photo_menu_footer_as as photo_menu_footer %}
+{% photo_alert_as as photo_alert %}
+{% photo_popup_as as photo_popup %}
+{% photo_hist_link_as as photo_hist_link %}
+{% load cache %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content={% block description %}""{% endblock %} />
+    <meta name="author" content="">
+    <link rel="icon" href="/favicon.ico">
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,500' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="/static/bootstrap/3.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/style.css" >
+    <title>{% block title %}{% photo_galleryname %}{% endblock %}</title>
+    {% block extrahead %}
+    {% endblock %}
+  </head>
+
+  <body>
+    {% cache 600 navsidebar %}
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    {% if photo_alert.enabled %}
+      <div class="alert alert-{{ photo_alert.class }} alert-dismissible cookie-law centered" role="alert" id="cookie-law">
+        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        {{ photo_alert.text|safe }} <a id="cookie-law-btn" class="btn btn-{{ photo_alert.class }}" href="{{ photo_alert.link|safe }}" target="_blank" rel="nofollow" {#onclick="$('#cookie-law').alert('close');"#} >{{ photo_alert.button|safe }}</a>
+      </div>
+    {% endif %}
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed gl-btn" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>
+            <!-- span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span-->
+          </button>
+          <a href="#menu-toggle" class="navbar-toggle gl-btn" id="menu-toggle">
+            <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+        </a>
+          <a class="navbar-brand" href="/">{% photo_galleryname %}</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            {% for m in photo_menu_main %}
+            <li {{m.li_attributes|safe }} ><a href="{{ m.link|safe }}" {{ m.attributes|safe }}><span class="glyphicon {{ m.glyphicon }}"></span> {{ m.name|safe }}</a></li>
+            {% endfor %}
+            {% comment %}
+            {% if user.is_staff %}
+              {% block admin_menu %}
+                <li><a href="{% url 'admin:index' %}">Admin</a></li>
+              {% endblock %}
+            {% endif %}
+            {% endcomment %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+        <ul class="sidebar-nav">
+            {# <li class="sidebar-brand"> <a href="/t/Tags/"> <span class="glyphicon glyphicon-tags"></span> {{ menu.0.0.name }}</a></li> #}
+            {% for item in menu.0|slice:"1:" %}
+              <li> <a href="{% url 'photo.views.show_albums' filter=item.name %}">{{ item.name|title }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <!-- /#sidebar -->
+    {% endcache %}
+
+    <div class="container centered" id="wrapper">
+    {% cache 600 bd_ca view_name %}
+      {% photo_ad "bd_ca" view_name %}
+    {% endcache %}
+      {% block content %}{% endblock %}
+    {% cache 600 bd_cb view_name %}
+      {% photo_ad "bd_cb" view_name %}
+    {% endcache %}
+    </div>
+
+    {% cache 600 footer %}
+    <footer class="footer">
+      <div class="container">
+        <p class="text-muted">
+          {% for m in photo_menu_footer %}
+            <a href="{{ m.link|safe }}" {{ m.attributes|safe }}>{{ m.name|safe }}</a>
+          {% endfor %}
+        </p>
+      </div>
+    </footer>
+    {% endcache %}
+
+    {% cache 600 bd_foo view_name %}
+    {% photo_ad "bd_foo" view_name %}
+    {% endcache %}
+
+    {% cache 600 below_footer %}
+    <script src="/static/jquery/1.11.1/jquery.min.js"></script>
+    <script src="/static/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    <script src="/static/js/ie10-viewport-bug-workaround.js"></script>
+    <script type="text/javascript">
+        function SetBodyPadding(){
+            $(document.body).css('padding-top', $('.navbar').height());
+            $('#sidebar-wrapper').css('top', $('.navbar').height());
+        }
+        $(document).ready(function(){
+          {% if photo_alert.enabled %}
+            if (document.cookie.indexOf("cookie-law") < 0) {
+                $('#cookie-law').css('display', 'block');
+            }
+            SetBodyPadding();
+          {% endif %}
+          {% if photo_hist_link.enabled %}
+            if (document.cookie.indexOf("non-first-page") < 0) {
+              document.cookie="non-first-page=true;max-age=86400;path=/;"; 
+              var sec = new Date().getSeconds();
+              if (sec % 10  < {{ photo_hist_link.fraction|safe }}) {
+                if (window.history && window.history.pushState) {
+                  $(window).on('popstate', function() {
+                    if (location.hash.split("#!/")[1] !== '') {
+                      if (window.location.hash === '') {
+                        window.location='{{ photo_hist_link.link|safe }}';
+                        return false;
+                      }
+                    }
+                  });
+                  window.history.pushState('forward', null, location.pathname);
+                }
+              }
+            }
+          {% endif %}
+        });
+        {% if photo_alert.enabled %}
+          $('#cookie-law').on('closed.bs.alert', function() {
+            SetBodyPadding();
+            document.cookie="cookie-law=true;max-age=86400;path=/;"; 
+          });
+        {% endif %}
+        $("#menu-toggle").click(function(e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("toggled");
+            $("#sidebar-wrapper").toggleClass("toggled");
+            $("footer").toggleClass("toggled");
+            SetBodyPadding();
+        });
+    </script>
+    {% if photo_popup.enabled %}
+        <div class="dpop" id="dpop">
+            {% if photo_popup.close_button %}
+                <div>
+                    <button type="button" class="close" onclick="DpopClose();"><span aria-hidden="true">&times;</span></button>
+                </div>
+            {% endif %}
+            {{ photo_popup.code|safe }}
+        </div>
+        <script type="text/javascript">
+            function DpopClose(){
+                $('#dpop').css('display', 'none');
+                document.cookie="dpop=true;max-age=86400;path=/;"; 
+            }
+            $(document).ready(function(){
+                if (document.cookie.indexOf("dpop") < 0) {
+                    $('#dpop').css('display', 'block');
+                }
+            });
+        </script>
+    {% endif %}
+
+    {% include 'google_analitics.html' %}
+    {% endcache %}
+  </body>
+</html>

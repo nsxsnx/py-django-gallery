@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block keywords %}"{{keywords}}"{% endblock %}
+{% block description %}"{{description|capfirst}}"{% endblock %}
+{% block title %}{{ title|capfirst }}{% endblock %}
+
+{% block admin_menu %}
+   {{ block.super }}
+   {% if menu_tag  %}
+     <li><a href="{% url 'admin:photo_tag_change' menu_tag.id %}">Change tag</a></li>
+   {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if page_h1 %}
+   <h1 class="tag_title">{{page_h1|capfirst}}</h1>
+{% endif %}
+
+<div class="albums">
+   {% for tag in tags %}
+   <div class="album">
+      <div class="title">
+         <a href="{{ tag.get_absolute_url }}">{{ tag.name }}</a>
+      </div>
+      <a href="{{ tag.get_absolute_url }}"><img class="img-rounded" alt="{{ tag.name }}"
+         src="{{ tag.cover.thumbnail.url }}" width="{{ tag.cover.thumbnail.width }}" height="{{ tag.cover.thumbnail.height }}" /></a>
+   </div>
+   {% empty %}
+   <p>No albums found</p>
+   {% endfor %}
+</div>
+
+{% comment %}
+<div class="paginator">
+   <ul class="pagination">
+      {% if tags.has_previous %}
+        <li><a href="{% url 'photo.views.show_albums' filter=filter %}{{ tags.previous_page_number }}/">&laquo;</a></li>
+      {% endif %}
+      {% for page in tags.show_pages %}
+         {% if page == tags.number %}
+            <li class="disabled"><a href="#">{{ tags.number }}</a></li>
+         {% elif page == 0 %}
+            <li class="disabled"><a href="#">...</a></li> 
+         {% else %}
+           <li><a href="{% url 'photo.views.show_albums' filter=filter %}{{ page }}/">{{ page }}</a></li>
+         {% endif %}
+      {% endfor %}
+      {% if tags.has_next %}
+      <li><a href="{% url 'photo.views.show_albums' filter=filter %}{{ tags.next_page_number }}/">&raquo;</a></li>
+      {% endif %}
+   </ul>
+</div>
+{% endcomment %}
+
+<nav class="paginator">
+{% if tags.has_next %}
+   <a class="btn btn-primary" href="{% url 'photo.views.show_albums' filter=filter %}{{ tags.next_page_number }}/">{{ pagination_btn_text }}</a>
+{% endif %}
+   {% if special_button.enabled %}
+      <a class="btn {{ special_button.class }}" href="{{ special_button.link }}" rel="nofollow" target="_blank"><span class="glyphicon {{ special_button.glyphicon }}"></span> {{ special_button.text }}</a>
+   {% endif %}
+</nav>
+
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block keywords %}"contact"{% endblock %}
+{% block description %}"contact us"{% endblock %}
+{% block title %}Contact Us{% endblock %}
+
+{% block admin_menu %}
+   {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<h3>Contact Us</h3>
+<form role="form" class="contact_form" method="post" action="{% url 'photo.views.show_contact' %}">
+    {% csrf_token %}
+    {% for field in form %}
+        {% if field.errors %}
+            <div class="form-group text-left has-error">
+            {% else %}
+            <div class="form-group text-left">
+        {% endif %}
+        {{ field.label_tag }} 
+        {% if field.errors %} <ul class="list-unstyled text-danger"> {% endif %}
+        {% for error in field.errors %}
+            <li>{{ error|escape }}</li>
+        {% endfor %}
+        {% if field.errors %} </ul> {% endif %}
+        {{ field }}
+        </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-default">Submit</button> 
+</form>
+{% endblock %}
